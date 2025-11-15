@@ -1,10 +1,16 @@
 (configStart)
 
 launch_ide = 1
-IDE = 0
-[0 -> Visual Studio Code]
-[1 -> NeoVim]
+IDE = lvim
+[
+    0 -> Visual Studio Code
+    1 -> NeoVim
+    // you can chose any ide you want, just enter the command you use to launch it in the 'IDE = ' field
+]
+
 absolute_path_dir = leetcodeProblems/
+
+copy_desc = 1
 
 chosen_lang = cpp
 [   

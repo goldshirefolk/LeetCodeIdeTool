@@ -1,5 +1,15 @@
 #pragma once
+
+#include <chrono>
+#include <cstdlib>
+#include <curl/curl.h>
+#include <filesystem>
+#include <fstream>
+#include <iostream>
+#include <jsoncpp/json/json.h>
+#include <regex>
 #include <string>
+#include <thread>
 #include <vector>
 
 #define LANGUAGE_COUNT 18
@@ -20,6 +30,7 @@ inline const std::string directoryTypeAskMessage = "\033[1;33mDo you want the pr
 
 inline const std::string publicConfigActiveIDE_string = "launch_ide";
 inline const std::string publicConfigChosenIDE_string = "IDE";
+inline const std::string publicConfigCopyDesc_string = "copy_desc";
 inline const std::string publicConfigAbsolutePathDir_string = "absolute_path_dir";
 inline const std::string publicConfigChosenLang_string = "chosen_lang";
 inline const std::string publicConfigPrevLaunched_string = "prev_launched";
