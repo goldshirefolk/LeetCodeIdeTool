@@ -1,20 +1,11 @@
 /// TODO : ADD CONFIG FILE PATH @ line 357
 
-#include "config.h"
-#include <chrono>
-#include <cstdlib>
-#include <curl/curl.h>
-#include <filesystem>
-#include <fstream>
-#include <iostream>
-#include <jsoncpp/json/json.h>
-#include <regex>
-#include <string>
-#include <thread>
-#include <vector>
+#include "scraperJson.h"
 
 using namespace LeetcodeToolConfig;
 namespace fs = std::filesystem;
+
+#define DEBUGMODE 0
 
 size_t WriteCallback(void *contents, size_t size, size_t nmemb, std::string *response) {
     size_t total_size = size * nmemb;
@@ -102,8 +93,6 @@ private:
         int start = string.find(start_token);
 
         if (start == std::string::npos) {
-            // std::cout << "\n\nCould not token : (" << start_token << " | " << end_token
-            //<< "), for : " << string << "\n\n";
             exit(1);
         }
         start += start_token.length();
@@ -288,10 +277,6 @@ public:
     static void exportCodeSnippet(std::string &description, std::ostream &outStream, languages chosen_language) {
         prepareCodeSnippet(description);
 
-        // std::cout << "\n\ncode_copy:" << description << "\n\n";
-        // exit(1);
-        // outStream << description << "\n\n";
-
         for (int i = 0; i < description.size(); i++) {
             if (i < description.size() - 1) {
                 if (description[i] == '\\' && description[i + 1] == 'n') {
@@ -399,12 +384,22 @@ std::string extractConfig(std::ifstream &public_config_file, const std::string c
 class IDE_Handler {
     char isActive;
     char chosen_ide;
+    char is_custom_ide;
+    std::string custom_ide;
 
 private:
 public:
     IDE_Handler(std::ifstream &public_config_file) {
         this->isActive = (char)std::stoi(extractConfig(public_config_file, publicConfigActiveIDE_string));
-        this->chosen_ide = (char)std::stoi(extractConfig(public_config_file, publicConfigChosenIDE_string));
+        std::string ide_string = extractConfig(public_config_file, publicConfigChosenIDE_string);
+
+        is_custom_ide = 0;
+        if (ide_string[0] >= '0' && ide_string[0] <= '9') {
+            this->chosen_ide = (char)std::stoi(ide_string);
+        } else {
+            is_custom_ide = 1;
+            custom_ide = ide_string;
+        }
     }
 
     void launchIDE(fs::path &file_path) {
@@ -415,7 +410,14 @@ public:
                   << ideNameStrings[chosen_ide] << "\n";
         std::this_thread::sleep_for(std::chrono::milliseconds(250));
 
-        std::string command = ideLaunchCommands[chosen_ide];
+        std::string command;
+        if (is_custom_ide == 0) {
+            command = ideLaunchCommands[chosen_ide];
+        } else {
+            command = custom_ide;
+            std::cout << "custom ide : " << custom_ide << "\n";
+        }
+
         command += " ";
         command += file_path.string();
 
@@ -440,11 +442,9 @@ fs::path createDir(const std::string &problem_name, const char is_abs_path) {
     fs::path dir = base / current_new_dir;
 
     if (fs::create_directories(dir, ec)) {
-        // std::cout << "Created: " << dir << '\n';
     } else if (ec) {
         std::cerr << "Error: " << ec.message() << '\n';
     } else {
-        // std::cout << "Already exists: " << dir << '\n';
     }
 
     return dir;
@@ -587,16 +587,16 @@ void exportCurrentProblemInfo() {
 }
 
 int main() {
-    // std::cout << "=== Testing LeetCode GraphQL API ===\n"
-    //<< std::endl;
-
     firstTimeLaunch();
+    char copy_desc = 1;
 
     std::ifstream config_file(publicConfigFileName);
     if (!config_file) {
         std::cout << "OPEN ERROR";
         return 0;
     }
+
+    copy_desc = (char)std::stoi(extractConfig(config_file, publicConfigCopyDesc_string));
 
     std::ifstream link_input("link");
 
@@ -606,45 +606,24 @@ int main() {
     std::cin >> link;
 
     std::string problem_name = stringExtractor::nameFromLink(link);
-    // std::cout << problem_name << std::endl;
 
-    // // Test 1: Get problem list
-    // //std::cout << "1. Fetching problem list..." << std::endl;
-    // std::string problemList = getProblemList(0, 5);  // First 5 problems
-    // //std::cout << "Problem list response size: " << problemList.size() << " bytes\n"
-    //           << std::endl;
-
-    // // Save raw response
-    // std::ofstream listFile("problem_list.json");
-    // listFile << problemList;
-    // listFile.close();
-    // //std::cout << "Problem list saved to problem_list.json\n"
-    //           << std::endl;
-
-    // std::cout << chooseLanguageString;
     languages chosen_language = getLanguageChar(extractConfig(config_file, publicConfigChosenLang_string));
-    // std::cout << "\n\n\nChosen lang : " << languageTokens[chosen_language] << "\n\n\n";
-
-    // std::cout << "Fetching problem details..." << std::endl;
 
     std::string problem_detail = getProblemDetail(problem_name);
     std::string problemDetail_copy = problem_detail;
-    // std::cout << "Problem detail response size: " << problem_detail.size() << " bytes\n"
-    //<< std::endl;
 
     problem_id = stringExtractor::extractFromJson(problem_detail, "\"questionId\":");
-    // std::cout << "Problem Id : " << problem_id << std::endl;
 
     problem_title = stringExtractor::extractFromJson(problem_detail, "\"title\":");
-    // std::cout << "Problem title : " << problem_title << std::endl;
 
     std::string content = stringExtractor::extractFromJson(problem_detail, "\"content\":");
 
     problem_difficulty = stringExtractor::extractFromJson(problem_detail, "\"difficulty\":");
-    // std::cout << "Problem difficulty : " << problem_difficulty << std::endl;
 
+#ifdef DEBUGMODE
     std::ofstream rawDesc_out("rawDesc");
     rawDesc_out << problem_detail;
+#endif
 
     //============================================================================================================================================
 
@@ -661,16 +640,8 @@ int main() {
 
     char is_abs_directory = input_handler.getAnswerForAbsoluteDirectory(response);
 
-    // std::cout << "IS ABS DIRECTORY : " << (int)is_abs_directory << "\n\n";
-
     fs::path created_file_path;
     std::ofstream code_file = createFileAndDir(problem_name, chosen_language, created_file_path, is_abs_directory);
-
-    // std::cout << "\n\n\n\n\n";
-    // std::cout << "=========EXTRACTED CONTENT=========" << "\n\n";
-
-    // std::cout << "\n\n";
-    // std::cout << "=========PROBLEM DESCRIPTION=========" << "\n";
 
     std::string clean_html_description = cleanHTML(content);
 
@@ -680,7 +651,8 @@ int main() {
 
     //============================================================================================================================================
 
-    stringExtractor::exportProblemHeader(code_file, (int)chosen_language);
+    if (copy_desc)
+        stringExtractor::exportProblemHeader(code_file, (int)chosen_language);
 
     //============================================================================================================================================
     std::string codeToken = "\"langSlug\":";
@@ -688,22 +660,14 @@ int main() {
     codeToken.append(languageTokens[(char)chosen_language]);
     codeToken.append("\"");
 
-    // std::cout << "TOKEN : " << codeToken;
-
     std::string problem_code = stringExtractor::extractFromJson(problemDetail_copy, codeToken);
 
-    // std::cout << "\n\ncode:" << problem_code << "\n\n";
-    //  std::cout << "\n\ncode_copy:" << problemDetail_copy << "\n\n";
-
-    // //std::cout << "\n\n"
-    //           << problemDetail_copy << "\n\n";
-    // std::cout << "\n\n\n";
     stringExtractor::exportCodeSnippet(problemDetail_copy, code_file, chosen_language);
-    // std::cout << "\n\n\n";
 
     //============================================================================================================================================
 
-    stringExtractor::exportDescription(clean_html_description, code_file, (int)chosen_language);
+    if (copy_desc)
+        stringExtractor::exportDescription(clean_html_description, code_file, (int)chosen_language);
 
     //============================================================================================================================================
 
@@ -711,26 +675,6 @@ int main() {
 
     IDE_Handler ide_handler(config_file);
     ide_handler.launchIDE(created_file_path);
-
-    /// Get code
-
-    // //std::cout << problemDetail_copy;
-
-    // // Save raw response
-    // std::ofstream detailFile("two_sum_detail.json");
-    // detailFile << problem_detail;
-    // detailFile.close();
-    // //std::cout << "Problem detail saved to two_sum_detail.json\n"
-    //           << std::endl;
-
-    // // Show preview of responses
-    // //std::cout << "=== Problem List Preview ===" << std::endl;
-    // //std::cout << problemList.substr(0, 500) << "...\n"
-    //           << std::endl;
-
-    // //std::cout
-    //     << "=== Problem Detail Preview ===" << std::endl;
-    // //std::cout << problem_detail << "..." << std::endl;
 
     return 0;
 }
