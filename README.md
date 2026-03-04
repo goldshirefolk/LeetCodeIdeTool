@@ -1,5 +1,5 @@
 The install script will install the following dependencies : `cmake`, `libcurl`, `jsoncpp`;
-If the installer fails, you have to install them manually.
+If the installer fails, you have to install them manually or just use staticinstall.sh.
 
 A tool for getting leet code problems directly into you IDE. It also copies the problem description and constraints and comments it out in the file,
 making you not have to alt tab to read the description.
