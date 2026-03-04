@@ -389,7 +389,10 @@ void launchIde(std::ifstream& config_file, fs::path &file_path) {
     std::string ide_string = extractConfig(config_file, publicConfigChosenIDE_string, true, publicConfigErrorNoIdeString);
     outputString("Launch IDE Command : ", ide_string);
 
-    std::string command = ide_string + " " + file_path.string();
+    std::string command = ide_string + " \"" + file_path.string() + "\"";
+    std::cout << std::flush;
+    std::cerr << std::flush;
+    
     system(command.c_str());
 }
 
@@ -517,16 +520,6 @@ int main(int argc, char* argv[]) {
 
     ensureConfigExists(getConfigPath());
     std::ifstream config_file(publicConfigFilePath);
-    // if (!config_file) {
-    //     std::ofstream new_config_file(publicConfigFileName);
-    //     new_config_file << defaultConfig;
-
-    //     config_file.close();
-    //     config_file.clear();
-    //     config_file.open(publicConfigFileName);
-
-    //     std::cout << "No config file could be found. The default one was created and is being used.";
-    // }
 
     copy_desc = (char)std::stoi(extractConfig(config_file, publicConfigCopyDesc_string, false, ""));
     is_abs_directory = (char)std::stoi(extractConfig(config_file, publicConfigIsAbsolutPath_string, false, ""));
@@ -537,13 +530,9 @@ int main(int argc, char* argv[]) {
     std::string problem_name = stringExtractor::nameFromLink(link);
     std::string problem_detail = getProblemDetail(problem_name);
     std::string problemDetail_copy = problem_detail;
-
     problem_id = stringExtractor::extractFromJson(problem_detail, "\"questionId\":");
-
     problem_title = stringExtractor::extractFromJson(problem_detail, "\"title\":");
-
     std::string content = stringExtractor::extractFromJson(problem_detail, "\"content\":");
-
     problem_difficulty = stringExtractor::extractFromJson(problem_detail, "\"difficulty\":");
 
     exportCurrentProblemInfo();
@@ -571,6 +560,7 @@ int main(int argc, char* argv[]) {
 
     outputString("Chosen Language : ", languageTokens[(char)chosen_language]);        
 
+    code_file.close();
     launchIde(config_file, created_file_path);
 
     return 0;
