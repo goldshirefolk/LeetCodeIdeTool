@@ -1,9 +1,9 @@
 (configStart)
 
+copy_desc = 1 // whether or not the description should be copied into the file
+path = 0 // 1 for absolute path, 0 for making the directory in the current path
 launch_ide = 1
-IDE = 0
-[0 -> Visual Studio Code]
-[1 -> NeoVim]
+ide_command = code
 absolute_path_dir = leetcodeProblems/
 
 chosen_lang = cpp
@@ -28,4 +28,6 @@ chosen_lang = cpp
     "rust",        //  rust
 ]
 
-(configEnd)
+// If you want to use a custom header for a specific language, declare a field like so "LANG_header" and type in the header and use '\n' to separate the lines
+
+(configEnd)prev_launched = 1

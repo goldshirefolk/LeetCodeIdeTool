@@ -1,11 +1,7 @@
-/// TODO : ADD CONFIG FILE PATH @ line 357
-
-#include "scraperJson.h"
+#include "leetcodeTool.h"
 
 using namespace LeetcodeToolConfig;
 namespace fs = std::filesystem;
-
-#define DEBUGMODE 0
 
 size_t WriteCallback(void *contents, size_t size, size_t nmemb, std::string *response) {
     size_t total_size = size * nmemb;
@@ -20,10 +16,8 @@ std::string makeGraphQLRequest(const std::string &query, const std::string &vari
     if (!curl)
         return "";
 
-    // Prepare the GraphQL request
     std::string post_data = "{\"query\":\"" + query + "\",\"variables\":" + variables + "}";
 
-    // Escape query
     std::string escaped_query;
     for (char c : query) {
         if (c == '\n')
@@ -85,6 +79,10 @@ std::string problem_title;
 std::string problem_difficulty;
 
 int desc_section_symbol_length = 32;
+
+void outputString(const std::string outputLabel, const std::string output) {
+    std::cout << "\033[1;33m" << outputLabel << "\033[0m" << output << "\n";
+}
 
 class stringExtractor {
 private:
@@ -249,7 +247,7 @@ public:
                 }
             } else if (section == 1) {
                 buffer = std::regex_replace(buffer, std::regex("\\\\"), "");
-            } else if (section == 2) {  // constraints
+            } else if (section == 2) {  // Constraints
                 buffer.insert(0, constraintsLineSymbol_start);
             }
 
@@ -328,8 +326,6 @@ std::string cleanHTML(const std::string &html) {
     return result;
 }
 
-#define LANG_STRUCTURE_TYPE_C 0
-
 languages getLanguageChar(const std::string &lang) {
     for (char i = 0; i < LANGUAGE_COUNT; i++) {
         if (lang == languageTokens[i]) {
@@ -358,6 +354,7 @@ std::string extractConfig(std::ifstream &public_config_file, const std::string c
     std::string buffer;
     do {
         std::getline(public_config_file, buffer);
+
         if (configString == publicConfigPrevLaunched_string && buffer == publicConfigConfigEndTag_string) {
             return buffer;
         }
@@ -383,43 +380,25 @@ std::string extractConfig(std::ifstream &public_config_file, const std::string c
 
 class IDE_Handler {
     char isActive;
-    char chosen_ide;
-    char is_custom_ide;
-    std::string custom_ide;
+    std::string ide_string;
 
 private:
 public:
     IDE_Handler(std::ifstream &public_config_file) {
         this->isActive = (char)std::stoi(extractConfig(public_config_file, publicConfigActiveIDE_string));
-        std::string ide_string = extractConfig(public_config_file, publicConfigChosenIDE_string);
-
-        is_custom_ide = 0;
-        if (ide_string[0] >= '0' && ide_string[0] <= '9') {
-            this->chosen_ide = (char)std::stoi(ide_string);
-        } else {
-            is_custom_ide = 1;
-            custom_ide = ide_string;
-        }
+        ide_string = extractConfig(public_config_file, publicConfigChosenIDE_string);
     }
 
     void launchIDE(fs::path &file_path) {
         if (!isActive)
             return;
 
-        std::cout << "\033[1;33mLaunching IDE : \033[0m"
-                  << ideNameStrings[chosen_ide] << "\n";
-        std::this_thread::sleep_for(std::chrono::milliseconds(250));
-
         std::string command;
-        if (is_custom_ide == 0) {
-            command = ideLaunchCommands[chosen_ide];
-        } else {
-            command = custom_ide;
-            std::cout << "custom ide : " << custom_ide << "\n";
-        }
+        command = ide_string;
 
-        command += " ";
-        command += file_path.string();
+        outputString("Launch IDE Command : ", command);
+
+        command += " " + file_path.string();
 
         system(command.c_str());
     }
@@ -458,7 +437,7 @@ std::ofstream createFileAndDir(std::string &problem_name, languages chosen_langu
     code_file_name.append(codeFileSufixes[chosen_language]);
     file_path /= code_file_name;
 
-    std::cout << createdFileString << file_path.string() << "\n\n";
+    outputString(createdFileString, file_path.string());
 
     std::ofstream code_file_path(file_path);
 
@@ -467,101 +446,6 @@ std::ofstream createFileAndDir(std::string &problem_name, languages chosen_langu
     }
 
     return code_file_path;
-}
-
-class InputHandler {
-private:
-    bool invalidAnswerCalled = false;
-
-    void processInput(std::string &input) {
-        for (int i = 0; input[i]; i++) {
-            input[i] = std::tolower(input[i]);
-        }
-    }
-
-    void moveCursorUp(int n) {
-        std::cout << "\033[" << n << "A";
-    }
-
-    void clearCurrentConsoleLine() {
-        std::cout << "\r\033[2K";
-        std::cout.flush();
-    }
-
-    void invalidAnswerHandler(std::string &input, const std::vector<std::vector<std::string>> &possible_answers) {
-        if (invalidAnswerCalled) {
-            moveCursorUp(possible_answers.size() + 2 /* 2 = the input and the invalid answer line */);
-        }
-
-        std::cout << invalidAnswerResponseString;
-
-        for (char i = 0; i < possible_answers.size(); i++) {
-            std::cout << "[";
-            for (char j = 0; j < possible_answers[i].size(); j++) {
-                std::cout << possible_answers[i][j];
-
-                if (j < possible_answers[i].size() - 1) {
-                    std::cout << "/";
-                }
-            }
-            std::cout << "]\n";
-        }
-
-        if (invalidAnswerCalled) {
-            clearCurrentConsoleLine();
-        }
-
-        std::cin >> input;
-
-        invalidAnswerCalled = true;
-    }
-
-    char processAnswerForAbsoluteDirectory(std::string &input) {
-        processInput(input);
-
-        for (char i = 0; i < absolutePathUserInputResponses.size(); i++) {
-            for (auto s : absolutePathUserInputResponses[i]) {
-                if (input == s) {
-                    return i;
-                }
-            }
-        }
-
-        invalidAnswerHandler(input, absolutePathUserInputResponses);
-        return getAnswerForAbsoluteDirectory(input);
-    }
-
-public:
-    char getAnswerForAbsoluteDirectory(std::string &input) {
-        char r = processAnswerForAbsoluteDirectory(input);
-        invalidAnswerCalled = false;
-
-        return r;
-    }
-};
-
-void firstTimeLaunch() {
-    std::ifstream config_file(publicConfigFileName);
-    std::ofstream config_file_out(publicConfigFileName, std::ios::app);
-
-    if (extractConfig(config_file, publicConfigPrevLaunched_string) == publicConfigConfigEndTag_string) {
-        std::cout << firstLaunchMessage;
-
-        std::string system_command_string = "cat ";
-        system_command_string += publicConfigFileName;
-        system(system_command_string.c_str());
-
-        std::cout << "\n";
-
-        config_file.close();
-
-        config_file_out << "prev_launched = 1\n{end}";
-    }
-
-    if (config_file.is_open())
-        config_file.close();
-
-    config_file_out.close();
 }
 
 void exportCurrentProblemInfo() {
@@ -586,8 +470,12 @@ void exportCurrentProblemInfo() {
               << ")]\n\n";
 }
 
-int main() {
-    firstTimeLaunch();
+int main(int argc, char* argv[]) {
+    if (argc == 1) {
+        std::cout << "Please enter a problem link!\n";
+        return 0;
+    }
+
     char copy_desc = 1;
 
     std::ifstream config_file(publicConfigFileName);
@@ -597,18 +485,12 @@ int main() {
     }
 
     copy_desc = (char)std::stoi(extractConfig(config_file, publicConfigCopyDesc_string));
-
-    std::ifstream link_input("link");
-
-    std::string link;
-
-    std::cout << openningString;
-    std::cin >> link;
-
-    std::string problem_name = stringExtractor::nameFromLink(link);
-
+    char is_abs_directory = (char)std::stoi(extractConfig(config_file, publicConfigIsAbsolutPath_string));
     languages chosen_language = getLanguageChar(extractConfig(config_file, publicConfigChosenLang_string));
 
+    std::string link(argv[1]);
+
+    std::string problem_name = stringExtractor::nameFromLink(link);
     std::string problem_detail = getProblemDetail(problem_name);
     std::string problemDetail_copy = problem_detail;
 
@@ -620,41 +502,16 @@ int main() {
 
     problem_difficulty = stringExtractor::extractFromJson(problem_detail, "\"difficulty\":");
 
-#ifdef DEBUGMODE
-    std::ofstream rawDesc_out("rawDesc");
-    rawDesc_out << problem_detail;
-#endif
-
-    //============================================================================================================================================
-
     exportCurrentProblemInfo();
-
-    InputHandler input_handler;
-
-    std::cout << directoryTypeAskMessage;
-    std::cout << "[" << "\033[1;32mC\033[0m"
-              << "\\" << "\033[1;32mA\033[0m" << "]" << "\n";
-
-    std::string response;
-    std::cin >> response;
-
-    char is_abs_directory = input_handler.getAnswerForAbsoluteDirectory(response);
 
     fs::path created_file_path;
     std::ofstream code_file = createFileAndDir(problem_name, chosen_language, created_file_path, is_abs_directory);
 
     std::string clean_html_description = cleanHTML(content);
 
-    std::ofstream cleansedHtml_out("cleansedHtmlDesc");
-    cleansedHtml_out << clean_html_description;
-    // //std::cout << cleanHTML(content) << "\n\n";
-
-    //============================================================================================================================================
-
     if (copy_desc)
         stringExtractor::exportProblemHeader(code_file, (int)chosen_language);
 
-    //============================================================================================================================================
     std::string codeToken = "\"langSlug\":";
     codeToken.append("\"");
     codeToken.append(languageTokens[(char)chosen_language]);
@@ -664,14 +521,11 @@ int main() {
 
     stringExtractor::exportCodeSnippet(problemDetail_copy, code_file, chosen_language);
 
-    //============================================================================================================================================
 
     if (copy_desc)
         stringExtractor::exportDescription(clean_html_description, code_file, (int)chosen_language);
 
-    //============================================================================================================================================
-
-    std::cout << "\033[1;33mChosen Language : \033[0m" << languageTokens[(char)chosen_language] << " (You can edit this in the public config file)\n";
+    outputString("Chosen Language : ", languageTokens[(char)chosen_language]);        
 
     IDE_Handler ide_handler(config_file);
     ide_handler.launchIDE(created_file_path);

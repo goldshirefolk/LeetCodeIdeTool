@@ -29,11 +29,12 @@ inline const std::string firstLaunchMessage = "Configure the tool from the publi
 inline const std::string directoryTypeAskMessage = "\033[1;33mDo you want the problem folder to be created in the current subdirectory or in the default absolute directory?\n\033[0m";
 
 inline const std::string publicConfigActiveIDE_string = "launch_ide";
-inline const std::string publicConfigChosenIDE_string = "IDE";
+inline const std::string publicConfigChosenIDE_string = "ide_command";
 inline const std::string publicConfigCopyDesc_string = "copy_desc";
 inline const std::string publicConfigAbsolutePathDir_string = "absolute_path_dir";
 inline const std::string publicConfigChosenLang_string = "chosen_lang";
 inline const std::string publicConfigPrevLaunched_string = "prev_launched";
+inline const std::string publicConfigIsAbsolutPath_string = "path";
 inline const std::string publicConfigConfigEndTag_string = "(configEnd)";
 
 inline const std::string openningString = "\033[1;33mEnter problem link:\n\033[0m";
@@ -198,7 +199,7 @@ inline const std::vector<std::vector<std::string>> commentDelims = {
 inline const std::string codeSnippetPrefixNewlines = "\n\n\n";
 
 inline const std::vector<std::string> codeSnippetPrefixes = {
-    "#include<iostream>\n#include<vector>\n#include<algorithm>\n#include<list>\n\nusing namespace std;",
+    "#include <bits/stdc++.h>\nusing namespace std;",
     "#include <stdio.h>\n#include <stdlib.h>\n#include <string.h>\n#include <math.h>\n#include <stdbool.h>\n#include <stdint.h>",
     "using System;\nusing System.Collections.Generic;\nusing System.Linq;\nusing System.Text;",
     "import java.util.*;\nimport java.io.*;",
@@ -220,16 +221,7 @@ inline const std::vector<std::string> codeSnippetPrefixes = {
 };
 
 inline const std::string absolutPathFolder = "/leetCodeProblems/";
-inline const std::string createdFileString = "\033[1;33mCreated File : \033[0m\n";
-inline const std::vector<std::string> ideLaunchCommands = {
-    "code",  // vscode
-    "nvim"   // nvim
-};
-
-inline const std::vector<std::string> ideNameStrings = {
-    "Visual Studio Code",
-    "Neo vim",
-};
+inline const std::string createdFileString = "Created File : ";
 
 inline const std::string invalidAnswerResponseString = "Invalid answer, please enter a valid answer:\n";
 
