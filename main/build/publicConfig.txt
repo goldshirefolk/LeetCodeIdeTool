@@ -30,4 +30,4 @@ chosen_lang = cpp
 
 // If you want to use a custom header for a specific language, declare a field like so "LANG_header" and type in the header and use '\n' to separate the lines
 
-(configEnd)prev_launched = 1
+(configEnd)

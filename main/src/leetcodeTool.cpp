@@ -84,6 +84,11 @@ void outputString(const std::string outputLabel, const std::string output) {
     std::cout << "\033[1;33m" << outputLabel << "\033[0m" << output << "\n";
 }
 
+void outputError(const std::string errorString) {
+    std::cerr << errorString << "\n";
+    exit(1);
+}
+
 class stringExtractor {
 private:
     static std::string extractToken(const std::string &string, const std::string &start_token, const std::string &end_token,
@@ -338,15 +343,7 @@ languages getLanguageChar(const std::string &lang) {
     return LANG_INVALID;
 }
 
-void handleBufferConfigError(const std::string &buffer, int p, const std::string configString) {
-    if (configString != publicConfigPrevLaunched_string)
-        if (p == buffer.length()) {
-            std::cout << "COULD NOT FIND CONFIG FOR " << configString << "\nQuitting...\n";
-            exit(1);
-        }
-}
-
-std::string extractConfig(std::ifstream &public_config_file, const std::string configString) {
+std::string extractConfig(std::ifstream &public_config_file, const std::string configString, bool mandatory, std::string errorMessage) {
     // reset file
     public_config_file.clear();
     public_config_file.seekg(0, std::ios::beg);
@@ -354,6 +351,14 @@ std::string extractConfig(std::ifstream &public_config_file, const std::string c
     std::string buffer;
     do {
         std::getline(public_config_file, buffer);
+
+        if (buffer.find(publicConfigConfigEndTag_string) != std::string::npos) {
+            if (mandatory) {
+                outputError(errorMessage);
+            }
+
+            return "";
+        }
 
         if (configString == publicConfigPrevLaunched_string && buffer == publicConfigConfigEndTag_string) {
             return buffer;
@@ -363,14 +368,12 @@ std::string extractConfig(std::ifstream &public_config_file, const std::string c
     int p = 0;
     while (buffer[p] != '=') {
         p++;
-        handleBufferConfigError(buffer, p, configString);
     }
 
     p++;
 
     while (buffer[p] == ' ') {
         p++;
-        handleBufferConfigError(buffer, p, configString);
     }
 
     buffer.erase(0, p);
@@ -385,8 +388,8 @@ class IDE_Handler {
 private:
 public:
     IDE_Handler(std::ifstream &public_config_file) {
-        this->isActive = (char)std::stoi(extractConfig(public_config_file, publicConfigActiveIDE_string));
-        ide_string = extractConfig(public_config_file, publicConfigChosenIDE_string);
+        this->isActive = (char)std::stoi(extractConfig(public_config_file, publicConfigActiveIDE_string, true, publicConfigErrorNoIsActiveIde));
+        ide_string = extractConfig(public_config_file, publicConfigChosenIDE_string, true, publicConfigErrorNoIdeString);
     }
 
     void launchIDE(fs::path &file_path) {
@@ -429,7 +432,16 @@ fs::path createDir(const std::string &problem_name, const char is_abs_path) {
     return dir;
 }
 
-std::ofstream createFileAndDir(std::string &problem_name, languages chosen_language, fs::path &file_path, const char is_abs_path) {
+void unescapeNewlines(std::string& input) {
+    size_t p = 0;
+    while ((p = input.find("\\n", p)) != std::string::npos) {
+        input.replace(p, 2, "\n");
+        p++;
+    }
+}
+
+std::ofstream createFileAndDir(std::string &problem_name, std::ifstream& config_file, 
+    languages chosen_language, fs::path &file_path, const char is_abs_path) {
 
     file_path = createDir(problem_name, is_abs_path);
 
@@ -441,8 +453,20 @@ std::ofstream createFileAndDir(std::string &problem_name, languages chosen_langu
 
     std::ofstream code_file_path(file_path);
 
+    std::string custom_header_config_tag = chosen_language + "_header";
+
+    std::string header;
+    std::string custom_header = extractConfig(config_file, custom_header_config_tag, false, ""); 
+
+    if (custom_header != "") {
+        header = custom_header;
+        unescapeNewlines(header);
+    } else {
+        header = codeSnippetPrefixes[(int)chosen_language];
+    }
+
     if ((int)chosen_language < codeSnippetPrefixes.size()) {
-        code_file_path << codeSnippetPrefixes[(int)chosen_language] << codeSnippetPrefixNewlines;
+        code_file_path << header << codeSnippetPrefixNewlines;
     }
 
     return code_file_path;
@@ -480,13 +504,19 @@ int main(int argc, char* argv[]) {
 
     std::ifstream config_file(publicConfigFileName);
     if (!config_file) {
-        std::cout << "OPEN ERROR";
-        return 0;
+        std::ofstream new_config_file(publicConfigFileName);
+        new_config_file << defaultConfig;
+
+        config_file.close();
+        config_file.clear();
+        config_file.open(publicConfigFileName);
+        
+        std::cout << "No config file could be found. The default one was created and is being used.";
     }
 
-    copy_desc = (char)std::stoi(extractConfig(config_file, publicConfigCopyDesc_string));
-    char is_abs_directory = (char)std::stoi(extractConfig(config_file, publicConfigIsAbsolutPath_string));
-    languages chosen_language = getLanguageChar(extractConfig(config_file, publicConfigChosenLang_string));
+    copy_desc = (char)std::stoi(extractConfig(config_file, publicConfigCopyDesc_string, false, ""));
+    char is_abs_directory = (char)std::stoi(extractConfig(config_file, publicConfigIsAbsolutPath_string, false, ""));
+    languages chosen_language = getLanguageChar(extractConfig(config_file, publicConfigChosenLang_string, false, ""));
 
     std::string link(argv[1]);
 
@@ -505,7 +535,7 @@ int main(int argc, char* argv[]) {
     exportCurrentProblemInfo();
 
     fs::path created_file_path;
-    std::ofstream code_file = createFileAndDir(problem_name, chosen_language, created_file_path, is_abs_directory);
+    std::ofstream code_file = createFileAndDir(problem_name, config_file, chosen_language, created_file_path, is_abs_directory);
 
     std::string clean_html_description = cleanHTML(content);
 

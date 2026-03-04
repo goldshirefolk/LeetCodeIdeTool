@@ -23,7 +23,41 @@
 namespace LeetcodeToolConfig {
 //==GENERAL==========================================================================================================================================
 
-inline const std::string publicConfigFileName = "publicConfig";
+inline const std::string defaultConfig = R"((configStart)
+
+copy_desc = 1 // whether or not the description should be copied into the file
+path = 0 // 1 for absolute path, 0 for making the directory in the current path
+launch_ide = 1
+ide_command = code
+absolute_path_dir = leetcodeProblems/
+
+chosen_lang = cpp
+[   
+    "cpp",         //  cpp
+    "c",           //  c
+    "csharp",      //  csharp
+    "java",        //  java
+    "python3",     //  python3
+    "python",      //  python
+    "javascript",  //  javascript
+    "typescript",  //  typescript
+    "golang",      //  go
+    "kotlin",      //  kotlin
+    "swift",       //  swift
+    "php",         //  php
+    "dart",        //  dart
+    "scala",       //  scala
+    "elixir",      //  elixir
+    "erlang",      //  erlang
+    "racket",      //  racket
+    "rust",        //  rust
+]
+
+// If you want to use a custom header for a specific language, declare a field like so "LANG_header" and type in the header and use '\n' to separate the lines
+
+(configEnd))";
+
+inline const std::string publicConfigFileName = "publicConfig.txt";
 
 inline const std::string firstLaunchMessage = "Configure the tool from the public config file with your prefferences!\n";
 inline const std::string directoryTypeAskMessage = "\033[1;33mDo you want the problem folder to be created in the current subdirectory or in the default absolute directory?\n\033[0m";
@@ -36,6 +70,9 @@ inline const std::string publicConfigChosenLang_string = "chosen_lang";
 inline const std::string publicConfigPrevLaunched_string = "prev_launched";
 inline const std::string publicConfigIsAbsolutPath_string = "path";
 inline const std::string publicConfigConfigEndTag_string = "(configEnd)";
+
+inline const std::string publicConfigErrorNoIsActiveIde = "whether or not the ide is supposed to be launched.";
+inline const std::string publicConfigErrorNoIdeString = "the launch command for the ide."; 
 
 inline const std::string openningString = "\033[1;33mEnter problem link:\n\033[0m";
 inline const std::string chooseLanguageString = "Enter your chosen programming language:\n";
