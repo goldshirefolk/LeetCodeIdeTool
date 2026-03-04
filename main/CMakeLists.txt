@@ -8,15 +8,15 @@ find_package(CURL REQUIRED)
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(JSONCPP REQUIRED jsoncpp)
 
-add_executable(leetcode_tool src/leetcodeTool.cpp)
+add_executable(lct src/leetcodeTool.cpp)
 
-target_include_directories(leetcode_tool PRIVATE 
+target_include_directories(lct PRIVATE 
     include
     ${CURL_INCLUDE_DIRS}
     ${JSONCPP_INCLUDE_DIRS}
 )
 
-target_link_libraries(leetcode_tool PRIVATE 
+target_link_libraries(lct PRIVATE 
     CURL::libcurl 
     ${JSONCPP_LIBRARIES}
     pthread

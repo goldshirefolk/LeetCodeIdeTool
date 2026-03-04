@@ -381,31 +381,17 @@ std::string extractConfig(std::ifstream &public_config_file, const std::string c
     return buffer;
 }
 
-class IDE_Handler {
-    char isActive;
-    std::string ide_string;
+void launchIde(std::ifstream& config_file, fs::path &file_path) {
+    char isActive = (char)std::stoi(extractConfig(config_file, publicConfigActiveIDE_string, true, publicConfigErrorNoIsActiveIde));
+    if (!isActive)
+        return;
 
-private:
-public:
-    IDE_Handler(std::ifstream &public_config_file) {
-        this->isActive = (char)std::stoi(extractConfig(public_config_file, publicConfigActiveIDE_string, true, publicConfigErrorNoIsActiveIde));
-        ide_string = extractConfig(public_config_file, publicConfigChosenIDE_string, true, publicConfigErrorNoIdeString);
-    }
+    std::string ide_string = extractConfig(config_file, publicConfigChosenIDE_string, true, publicConfigErrorNoIdeString);
+    outputString("Launch IDE Command : ", ide_string);
 
-    void launchIDE(fs::path &file_path) {
-        if (!isActive)
-            return;
-
-        std::string command;
-        command = ide_string;
-
-        outputString("Launch IDE Command : ", command);
-
-        command += " " + file_path.string();
-
-        system(command.c_str());
-    }
-};
+    std::string command = ide_string + " " + file_path.string();
+    system(command.c_str());
+}
 
 fs::path createDir(const std::string &problem_name, const char is_abs_path) {
     std::error_code ec;
@@ -494,28 +480,56 @@ void exportCurrentProblemInfo() {
               << ")]\n\n";
 }
 
+inline std::string getConfigPath() {
+    const char* home = std::getenv("HOME");
+    if (home == nullptr) {
+        return configPath; 
+    }
+    return std::string(home) + configPath;
+}
+
+inline const std::string publicConfigFilePath = getConfigPath();
+
+void ensureConfigExists(const std::string& path) {
+    namespace fs = std::filesystem;
+    
+    fs::path configPath(path);
+    if (!fs::exists(configPath.parent_path())) {
+        fs::create_directories(configPath.parent_path());
+    }
+
+    if (!fs::exists(configPath)) {
+        std::ofstream outFile(path);
+        outFile << defaultConfig;
+        outFile.close();
+        std::cout << "No config file found, created the default one at : " << path << std::endl;
+    }
+}
+
 int main(int argc, char* argv[]) {
     if (argc == 1) {
-        std::cout << "Please enter a problem link!\n";
+        std::cout << "Please enter a problem link as the second argument!\n";
         return 0;
     }
 
     char copy_desc = 1;
+    char is_abs_directory = 1;
 
-    std::ifstream config_file(publicConfigFileName);
-    if (!config_file) {
-        std::ofstream new_config_file(publicConfigFileName);
-        new_config_file << defaultConfig;
+    ensureConfigExists(getConfigPath());
+    std::ifstream config_file(publicConfigFilePath);
+    // if (!config_file) {
+    //     std::ofstream new_config_file(publicConfigFileName);
+    //     new_config_file << defaultConfig;
 
-        config_file.close();
-        config_file.clear();
-        config_file.open(publicConfigFileName);
-        
-        std::cout << "No config file could be found. The default one was created and is being used.";
-    }
+    //     config_file.close();
+    //     config_file.clear();
+    //     config_file.open(publicConfigFileName);
+
+    //     std::cout << "No config file could be found. The default one was created and is being used.";
+    // }
 
     copy_desc = (char)std::stoi(extractConfig(config_file, publicConfigCopyDesc_string, false, ""));
-    char is_abs_directory = (char)std::stoi(extractConfig(config_file, publicConfigIsAbsolutPath_string, false, ""));
+    is_abs_directory = (char)std::stoi(extractConfig(config_file, publicConfigIsAbsolutPath_string, false, ""));
     languages chosen_language = getLanguageChar(extractConfig(config_file, publicConfigChosenLang_string, false, ""));
 
     std::string link(argv[1]);
@@ -557,8 +571,7 @@ int main(int argc, char* argv[]) {
 
     outputString("Chosen Language : ", languageTokens[(char)chosen_language]);        
 
-    IDE_Handler ide_handler(config_file);
-    ide_handler.launchIDE(created_file_path);
+    launchIde(config_file, created_file_path);
 
     return 0;
 }

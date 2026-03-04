@@ -23,10 +23,11 @@
 namespace LeetcodeToolConfig {
 //==GENERAL==========================================================================================================================================
 
+inline const std::string configPath = "/.lct/publicConfig.txt";
 inline const std::string defaultConfig = R"((configStart)
 
 copy_desc = 1 // whether or not the description should be copied into the file
-path = 0 // 1 for absolute path, 0 for making the directory in the current path
+path = 1 // 1 for absolute path, 0 for making the directory in the current path
 launch_ide = 1
 ide_command = code
 absolute_path_dir = leetcodeProblems/

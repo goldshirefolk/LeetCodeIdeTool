@@ -1,1 +1,0 @@
-/usr/bin/c++ CMakeFiles/leetcode_tool.dir/src/leetcodeTool.cpp.o -o leetcode_tool  /usr/lib/x86_64-linux-gnu/libcurl.so -ljsoncpp -lpthread -lstdc++fs 
