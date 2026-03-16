@@ -6,6 +6,7 @@ namespace fs = std::filesystem;
 size_t WriteCallback(void *contents, size_t size, size_t nmemb, std::string *response) {
     size_t total_size = size * nmemb;
     response->append((char *)contents, total_size);
+
     return total_size;
 }
 
@@ -338,13 +339,12 @@ languages getLanguageChar(const std::string &lang) {
         }
     }
 
-    std::cout << "INVALID LANGUAGE FOUND IN CONFIG FILE, PLEASE CHECK THE CONFIG FILE @ " << "\nQuitting...\n\n";
-    exit(1);
+    outputError(publicConfigErrorInvalidLanguage);
     return LANG_INVALID;
 }
 
 std::string extractConfig(std::ifstream &public_config_file, const std::string configString, bool mandatory, std::string errorMessage) {
-    // reset file
+    /// Reset file
     public_config_file.clear();
     public_config_file.seekg(0, std::ios::beg);
 
@@ -396,7 +396,7 @@ void launchIde(std::ifstream& config_file, fs::path &file_path) {
     system(command.c_str());
 }
 
-fs::path createDir(const std::string &problem_name, const char is_abs_path) {
+fs::path createDir(const std::string &problem_name, const char is_abs_path, const std::string &abs_path_name) {
     std::error_code ec;
 
     fs::path base;
@@ -405,17 +405,15 @@ fs::path createDir(const std::string &problem_name, const char is_abs_path) {
         base = fs::current_path();
     } else {
         const char *home = std::getenv("HOME");
-        base = std::string(home) + absolutPathFolder;
+        base = std::string(home) + abs_path_name;
     }
 
     fs::path current_new_dir = fs::path(problem_name);
-
     fs::path dir = base / current_new_dir;
 
     if (fs::create_directories(dir, ec)) {
     } else if (ec) {
         std::cerr << "Error: " << ec.message() << '\n';
-    } else {
     }
 
     return dir;
@@ -432,7 +430,15 @@ void unescapeNewlines(std::string& input) {
 std::ofstream createFileAndDir(std::string &problem_name, std::ifstream& config_file, 
     languages chosen_language, fs::path &file_path, const char is_abs_path) {
 
-    file_path = createDir(problem_name, is_abs_path);
+
+    std::string absolute_directory_path = extractConfig(config_file, publicConfigAbsolutePathDir_string, true, "");
+    if (absolute_directory_path[0] != '/') {
+        absolute_directory_path = '/' + absolute_directory_path;
+    }
+    if (absolute_directory_path[absolute_directory_path.length() - 1] != '/') {
+        absolute_directory_path += '/';
+    }
+    file_path = createDir(problem_name, is_abs_path, absolute_directory_path);
 
     std::string code_file_name = problem_name;
     code_file_name.append(codeFileSufixes[chosen_language]);
@@ -505,13 +511,53 @@ void ensureConfigExists(const std::string& path) {
         std::ofstream outFile(path);
         outFile << defaultConfig;
         outFile.close();
-        std::cout << "No config file found, created the default one at : " << path << std::endl;
+
+        std::cout << noConfigFileMessage << path << std::endl;
     }
+}
+
+bool processCommands(int argc, char* argv[]) {
+    for (int i = 1; i < argc; i++) {
+        if (argv[i][0] == '-') {
+            std::string argument(argv[i]);
+            argument.erase(0, 1); // get rid of the '-'
+            int key = -1;
+
+            /// Get command key, because you can't use switch cases with strings in cpp for some reason
+            for (int j = 0; j < commandTags.size(); j++) {
+                if (argument == commandTags[j]) {
+                    key = j;
+                    break;
+                }
+            }
+
+            switch (key) {
+                case -1 :
+                    break;
+                case HELP_COMMAND_INDX :
+                    std::cout << helpString << std::endl;
+                    break;
+                case OPEN_LAST_INDX :
+                    /// TO-DO : add open last functionallity
+                    break;
+            }
+
+            if (key != -1)
+                return true;
+        }
+
+    }
+
+    return false;
 }
 
 int main(int argc, char* argv[]) {
     if (argc == 1) {
-        std::cout << "Please enter a problem link as the second argument!\n";
+        std::cout << invalidInputError;
+        return 0;
+    }
+
+    if (processCommands(argc, argv)) {
         return 0;
     }
 
@@ -551,9 +597,7 @@ int main(int argc, char* argv[]) {
     codeToken.append("\"");
 
     std::string problem_code = stringExtractor::extractFromJson(problemDetail_copy, codeToken);
-
     stringExtractor::exportCodeSnippet(problemDetail_copy, code_file, chosen_language);
-
 
     if (copy_desc)
         stringExtractor::exportDescription(clean_html_description, code_file, (int)chosen_language);

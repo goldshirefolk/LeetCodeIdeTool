@@ -9,7 +9,6 @@
 #include <jsoncpp/json/json.h>
 #include <regex>
 #include <string>
-#include <thread>
 #include <vector>
 
 #define LANGUAGE_COUNT 18
@@ -58,11 +57,15 @@ chosen_lang = cpp
 
 (configEnd))";
 
+inline const std::string helpString = R"(Run lct $LINK_TO_PROBLEM to copy over a problem and launch your ide.
+
+-openlast or -ol to open up the last problem you created with lct
+
+You can modify the behaviour of the tool by editing the config file found at ~/.lct)";
+
 inline const std::string publicConfigFileName = "publicConfig.txt";
-
 inline const std::string firstLaunchMessage = "Configure the tool from the public config file with your prefferences!\n";
-inline const std::string directoryTypeAskMessage = "\033[1;33mDo you want the problem folder to be created in the current subdirectory or in the default absolute directory?\n\033[0m";
-
+inline const std::string noConfigFileMessage = "No config file found, created the default one at : ";
 inline const std::string publicConfigActiveIDE_string = "launch_ide";
 inline const std::string publicConfigChosenIDE_string = "ide_command";
 inline const std::string publicConfigCopyDesc_string = "copy_desc";
@@ -72,8 +75,12 @@ inline const std::string publicConfigPrevLaunched_string = "prev_launched";
 inline const std::string publicConfigIsAbsolutPath_string = "path";
 inline const std::string publicConfigConfigEndTag_string = "(configEnd)";
 
+inline const std::string publicConfigPath = "(~/.lct/publicConfig.txt)";
+
 inline const std::string publicConfigErrorNoIsActiveIde = "whether or not the ide is supposed to be launched.";
-inline const std::string publicConfigErrorNoIdeString = "the launch command for the ide."; 
+inline const std::string publicConfigErrorNoIdeString = "the launch command for the ide." + publicConfigPath; 
+inline const std::string publicConfigErrorInvalidLanguage = "Invalid language found in config file! Please select a valid language." + publicConfigPath;
+inline const std::string publicConfigErrorNoAbsolutePathDirectory = "No directory found in config for absolute path! " + publicConfigPath;
 
 inline const std::string openningString = "\033[1;33mEnter problem link:\n\033[0m";
 inline const std::string chooseLanguageString = "Enter your chosen programming language:\n";
@@ -97,6 +104,14 @@ inline const std::vector<int> maxSectionNewLines = {2, 2, 1};
 
 inline const int descLineMaxLength = 96;
 inline const int descSectionMax = 1;
+
+
+inline const std::string invalidInputError = "Please enter a problem link as the second argument!\nUse \"lct -help\" to see the possible commands.";
+
+inline const std::vector<std::string> commandTags = {"help", "l"};
+#define HELP_COMMAND_INDX 0
+#define OPEN_LAST_INDX 1
+
 //==QUERIES=========================================================================================================================================
 inline const std::string generatedLinkStart = "https://leetcode.com/problems/";
 
@@ -260,11 +275,4 @@ inline const std::vector<std::string> codeSnippetPrefixes = {
 
 inline const std::string absolutPathFolder = "/leetCodeProblems/";
 inline const std::string createdFileString = "Created File : ";
-
-inline const std::string invalidAnswerResponseString = "Invalid answer, please enter a valid answer:\n";
-
-inline const std::vector<std::vector<std::string>> absolutePathUserInputResponses = {
-    {"c", "curr", "cur", "current"},
-    {"a", "abs", "absolute"},
-};
-}  // namespace LeetcodeToolConfig
+}
