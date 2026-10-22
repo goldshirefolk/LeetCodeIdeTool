@@ -118,7 +118,7 @@ void exportProblemHeader(std::ostream& outStream, int lang) {
 
     outStream << start_buffer << '\n';
 
-    /// Show link
+    // Show link
     start_buffer.clear();
 
     start_buffer = generatedLinkStart;
