@@ -21,8 +21,8 @@ target_include_directories(lct PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/include
 )
 
-target_link_libraries(lct PRIVATE 
-    CURL::libcurl 
-    PkgConfig::JSONCPP
-    stdc++fs
+target_link_libraries(lct PRIVATE
+        CURL::libcurl
+        PkgConfig::JSONCPP
+        $<$<NOT:$<PLATFORM_ID:Darwin>>:stdc++fs>
 )
