@@ -1,13 +1,5 @@
 #pragma once
 
-#include <chrono>
-#include <cstdlib>
-#include <curl/curl.h>
-#include <filesystem>
-#include <fstream>
-#include <iostream>
-#include <jsoncpp/json/json.h>
-#include <regex>
 #include <string>
 #include <vector>
 
@@ -20,6 +12,17 @@
 #define IDE_CONFIG_VAL_NVIM 1
 
 namespace LeetcodeToolConfig {
+
+inline bool problem_has_images = false;
+inline std::string problem_name;
+inline std::string problem_detail;
+inline std::string problemDetail_copy;
+inline std::string problem_id;
+inline std::string problem_title;
+inline std::string problem_difficulty;
+inline std::string content;
+inline int desc_section_symbol_length = 32;
+
 //==GENERAL==========================================================================================================================================
 
 inline const std::string configPath = "/.lct/publicConfig.txt";
@@ -57,15 +60,18 @@ chosen_lang = cpp
 
 (configEnd))";
 
-inline const std::string helpString = R"(Run lct $LINK_TO_PROBLEM to copy over a problem and launch your ide.
+inline const std::string helpString =
+    R"(Run lct $LINK_TO_PROBLEM to copy over a problem and launch your ide.
 
 -openlast or -ol to open up the last problem you created with lct
 
 You can modify the behaviour of the tool by editing the config file found at ~/.lct)";
 
 inline const std::string publicConfigFileName = "publicConfig.txt";
-inline const std::string firstLaunchMessage = "Configure the tool from the public config file with your prefferences!\n";
-inline const std::string noConfigFileMessage = "No config file found, created the default one at : ";
+inline const std::string firstLaunchMessage =
+    "Configure the tool from the public config file with your prefferences!\n";
+inline const std::string noConfigFileMessage =
+    "No config file found, created the default one at : ";
 inline const std::string publicConfigActiveIDE_string = "launch_ide";
 inline const std::string publicConfigChosenIDE_string = "ide_command";
 inline const std::string publicConfigCopyDesc_string = "copy_desc";
@@ -77,15 +83,20 @@ inline const std::string publicConfigConfigEndTag_string = "(configEnd)";
 
 inline const std::string publicConfigPath = "(~/.lct/publicConfig.txt)";
 
-inline const std::string publicConfigErrorNoIsActiveIde = "whether or not the ide is supposed to be launched.";
-inline const std::string publicConfigErrorNoIdeString = "the launch command for the ide." + publicConfigPath; 
-inline const std::string publicConfigErrorInvalidLanguage = "Invalid language found in config file! Please select a valid language." + publicConfigPath;
-inline const std::string publicConfigErrorNoAbsolutePathDirectory = "No directory found in config for absolute path! " + publicConfigPath;
+inline const std::string publicConfigErrorNoIsActiveIde =
+    "whether or not the ide is supposed to be launched.";
+inline const std::string publicConfigErrorNoIdeString =
+    "the launch command for the ide." + publicConfigPath;
+inline const std::string publicConfigErrorInvalidLanguage =
+    "Invalid language found in config file! Please select a valid language." + publicConfigPath;
+inline const std::string publicConfigErrorNoAbsolutePathDirectory =
+    "No directory found in config for absolute path! " + publicConfigPath;
 
 inline const std::string openningString = "\033[1;33mEnter problem link:\n\033[0m";
 inline const std::string chooseLanguageString = "Enter your chosen programming language:\n";
 
-inline const std::string image_warning = "\n!!! Problem has images, it is best you use the link !!!\n";
+inline const std::string image_warning =
+    "\n!!! Problem has images, it is best you use the link !!!\n";
 
 inline const std::string newLine_token = "\\n";
 
@@ -105,8 +116,9 @@ inline const std::vector<int> maxSectionNewLines = {2, 2, 1};
 inline const int descLineMaxLength = 96;
 inline const int descSectionMax = 1;
 
-
-inline const std::string invalidInputError = "Please enter a problem link as the second argument!\nUse \"lct -help\" to see the possible commands.";
+inline const std::string invalidInputError =
+    "Please enter a problem link as the second argument!\nUse \"lct -help\" to "
+    "see the possible commands.";
 
 inline const std::vector<std::string> commandTags = {"help", "l"};
 #define HELP_COMMAND_INDX 0
@@ -184,95 +196,87 @@ typedef enum {
 } languages;
 
 inline const std::vector<std::string> languageTokens = {
-    "cpp",         //  cpp
-    "c",           //  c
-    "csharp",      //  csharp
-    "java",        //  java
-    "python3",     //  python3
-    "python",      //  python
-    "javascript",  //  javascript
-    "typescript",  //  typescript
-    "golang",      //  go
-    "kotlin",      //  kotlin
-    "swift",       //  swift
-    "php",         //  php
-    "dart",        //  dart
-    "scala",       //  scala
-    "elixir",      //  elixir
-    "erlang",      //  erlang
-    "racket",      //  racket
-    "rust",        //  rust
+    "cpp",        //  cpp
+    "c",          //  c
+    "csharp",     //  csharp
+    "java",       //  java
+    "python3",    //  python3
+    "python",     //  python
+    "javascript", //  javascript
+    "typescript", //  typescript
+    "golang",     //  go
+    "kotlin",     //  kotlin
+    "swift",      //  swift
+    "php",        //  php
+    "dart",       //  dart
+    "scala",      //  scala
+    "elixir",     //  elixir
+    "erlang",     //  erlang
+    "racket",     //  racket
+    "rust",       //  rust
     "\n\nINVALID!!\n\n",
 };
 
 inline const std::vector<std::string> codeFileSufixes = {
-    ".cpp",
-    ".c",
-    ".cs",
-    ".java",
-    ".py",
-    ".py",
-    ".js",
-    ".ts",
-    ".go",
-    ".kt",
-    ".swift",
-    ".php",
-    ".dart",
-    ".scala",
-    ".ex",
-    ".erl",
-    ".rkt",
-    ".rs",
-    "",
+    ".cpp",   ".c",   ".cs",   ".java",  ".py", ".py",  ".js",  ".ts", ".go", ".kt",
+    ".swift", ".php", ".dart", ".scala", ".ex", ".erl", ".rkt", ".rs", "",
 };
 
 inline const std::vector<std::vector<std::string>> commentDelims = {
-    {"/*", "*/"},          // cpp
-    {"/*", "*/"},          // c
-    {"/*", "*/"},          // csharp
-    {"/*", "*/"},          // java
-    {"\"\"\"", "\"\"\""},  // python3
-    {"\"\"\"", "\"\"\""},  // python
-    {"/*", "*/"},          // javascript
-    {"/*", "*/"},          // typescript
-    {"/*", "*/"},          // golang
-    {"/*", "*/"},          // kotlin
-    {"/*", "*/"},          // swift
-    {"/*", "*/"},          // php
-    {"/*", "*/"},          // dart
-    {"/*", "*/"},          // scala
-    {"", ""},              // elixir (no block comments)
-    {"", ""},              // erlang (no block comments)
-    {"#|", "|#"},          // racket
-    {"/*", "*/"},          // rust
-    {"", ""}               // INVALID!!
+    {"/*", "*/"},         // cpp
+    {"/*", "*/"},         // c
+    {"/*", "*/"},         // csharp
+    {"/*", "*/"},         // java
+    {"\"\"\"", "\"\"\""}, // python3
+    {"\"\"\"", "\"\"\""}, // python
+    {"/*", "*/"},         // javascript
+    {"/*", "*/"},         // typescript
+    {"/*", "*/"},         // golang
+    {"/*", "*/"},         // kotlin
+    {"/*", "*/"},         // swift
+    {"/*", "*/"},         // php
+    {"/*", "*/"},         // dart
+    {"/*", "*/"},         // scala
+    {"", ""},             // elixir (no block comments)
+    {"", ""},             // erlang (no block comments)
+    {"#|", "|#"},         // racket
+    {"/*", "*/"},         // rust
+    {"", ""}              // INVALID!!
 };
 
 inline const std::string codeSnippetPrefixNewlines = "\n\n\n";
 
 inline const std::vector<std::string> codeSnippetPrefixes = {
     "#include <bits/stdc++.h>\nusing namespace std;",
-    "#include <stdio.h>\n#include <stdlib.h>\n#include <string.h>\n#include <math.h>\n#include <stdbool.h>\n#include <stdint.h>",
-    "using System;\nusing System.Collections.Generic;\nusing System.Linq;\nusing System.Text;",
+    "#include <stdio.h>\n#include <stdlib.h>\n#include <string.h>\n#include "
+    "<math.h>\n#include <stdbool.h>\n#include <stdint.h>",
+    "using System;\nusing System.Collections.Generic;\nusing "
+    "System.Linq;\nusing System.Text;",
     "import java.util.*;\nimport java.io.*;",
-    "from typing import List, Optional, Tuple, Dict, Set\nimport sys\nimport math\nimport collections\nimport heapq\nimport bisect\nimport itertools",
-    "import sys\nimport math\nimport collections\nimport heapq\nimport bisect\nimport itertools",
+    "from typing import List, Optional, Tuple, Dict, Set\nimport sys\nimport "
+    "math\nimport collections\nimport heapq\nimport bisect\nimport itertools",
+    "import sys\nimport math\nimport collections\nimport heapq\nimport "
+    "bisect\nimport itertools",
     "'use strict';",
     "export {};",
-    "package main\n\nimport (\n    \"bufio\"\n    \"fmt\"\n    \"os\"\n    \"strconv\"\n    \"strings\"\n    \"math\"\n    \"sort\"\n    \"container/heap\"\n)",
+    "package main\n\nimport (\n    \"bufio\"\n    \"fmt\"\n    \"os\"\n    "
+    "\"strconv\"\n    \"strings\"\n    \"math\"\n    \"sort\"\n    "
+    "\"container/heap\"\n)",
     "import java.util.*\nimport kotlin.math.*",
     "import Foundation",
     "<?php\ndeclare(strict_types=1);",
     "import 'dart:math';\nimport 'dart:collection';\nimport 'dart:io';",
-    "import scala.collection.mutable\nimport scala.collection.immutable\nimport scala.math._",
+    "import scala.collection.mutable\nimport "
+    "scala.collection.immutable\nimport scala.math._",
     "import Enum\nimport MapSet\nimport Bitwise\nrequire Integer",
     "-module(solution).",
     "#lang racket",
-    "use std::cmp::{min, max, Ordering};\nuse std::collections::{HashMap, HashSet, BTreeMap, BTreeSet, VecDeque, BinaryHeap};\nuse std::io::{self, Read};",
+    "use std::cmp::{min, max, Ordering};\nuse std::collections::{HashMap, "
+    "HashSet, BTreeMap, BTreeSet, VecDeque, BinaryHeap};\nuse std::io::{self, "
+    "Read};",
     "",
 };
 
 inline const std::string absolutPathFolder = "/leetCodeProblems/";
 inline const std::string createdFileString = "Created File : ";
-}
+} // namespace LeetcodeToolConfig
