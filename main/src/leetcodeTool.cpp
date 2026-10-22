@@ -5,12 +5,17 @@ namespace fs = std::filesystem;
 
 void extractProblemFields(std::string& link) {
     problem_name = stringUtils::nameFromLink(link);
-    problem_detail = apiUtils::getProblemDetail(problem_name);
+    problem_detail =
+        apiUtils::getProblemDetail(problem_name);
     problemDetail_copy = problem_detail;
-    problem_id = stringUtils::extractFromJson(problem_detail, "\"questionId\":");
-    problem_title = stringUtils::extractFromJson(problem_detail, "\"title\":");
-    content = stringUtils::extractFromJson(problem_detail, "\"content\":");
-    problem_difficulty = stringUtils::extractFromJson(problem_detail, "\"difficulty\":");
+    problem_id = stringUtils::extractFromJson(
+        problem_detail, "\"questionId\":");
+    problem_title = stringUtils::extractFromJson(
+        problem_detail, "\"title\":");
+    content = stringUtils::extractFromJson(problem_detail,
+                                           "\"content\":");
+    problem_difficulty = stringUtils::extractFromJson(
+        problem_detail, "\"difficulty\":");
 }
 
 languages getLanguageChar(const std::string& lang) {
@@ -20,21 +25,28 @@ languages getLanguageChar(const std::string& lang) {
         }
     }
 
-    stringUtils::outputError(publicConfigErrorInvalidLanguage);
+    stringUtils::outputError(
+        publicConfigErrorInvalidLanguage);
     return LANG_INVALID;
 }
 
-void launchIde(std::ifstream& config_file, fs::path& file_path) {
-    char isActive = (char)std::stoi(configUtils::extractConfig(
-        config_file, publicConfigActiveIDE_string, true, publicConfigErrorNoIsActiveIde));
+void launchIde(std::ifstream& config_file,
+               fs::path& file_path) {
+    char isActive =
+        (char)std::stoi(configUtils::extractConfig(
+            config_file, publicConfigActiveIDE_string, true,
+            publicConfigErrorNoIsActiveIde));
     if (!isActive)
         return;
 
-    std::string ide_string = configUtils::extractConfig(config_file, publicConfigChosenIDE_string,
-                                                        true, publicConfigErrorNoIdeString);
-    stringUtils::outputString("Launch IDE Command : ", ide_string);
+    std::string ide_string = configUtils::extractConfig(
+        config_file, publicConfigChosenIDE_string, true,
+        publicConfigErrorNoIdeString);
+    stringUtils::outputString("Launch IDE Command : ",
+                              ide_string);
 
-    std::string command = ide_string + " \"" + file_path.string() + "\"";
+    std::string command =
+        ide_string + " \"" + file_path.string() + "\"";
     std::cout << std::flush;
     std::cerr << std::flush;
 
@@ -48,8 +60,9 @@ bool processCommands(int argc, char* argv[]) {
             argument.erase(0, 1); // get rid of the '-'
             int key = -1;
 
-            /// Get command key, because you can't use switch cases with strings in
-            /// cpp for some reason
+            /// Get command key, because you can't use
+            /// switch cases with strings in cpp for some
+            /// reason
             for (int j = 0; j < commandTags.size(); j++) {
                 if (argument == commandTags[j]) {
                     key = j;
@@ -86,15 +99,22 @@ int main(int argc, char* argv[]) {
         return 0;
     }
 
-    configUtils::ensureConfigExists(configUtils::getConfigPath());
+    configUtils::ensureConfigExists(
+        configUtils::getConfigPath());
     std::ifstream config_file(configUtils::getConfigPath());
 
-    char copy_desc = (char)std::stoi(
-        configUtils::extractConfig(config_file, publicConfigCopyDesc_string, false, ""));
-    char is_abs_directory = (char)std::stoi(
-        configUtils::extractConfig(config_file, publicConfigIsAbsolutPath_string, false, ""));
-    languages chosen_language = getLanguageChar(
-        configUtils::extractConfig(config_file, publicConfigChosenLang_string, false, ""));
+    char copy_desc =
+        (char)std::stoi(configUtils::extractConfig(
+            config_file, publicConfigCopyDesc_string, false,
+            ""));
+    char is_abs_directory =
+        (char)std::stoi(configUtils::extractConfig(
+            config_file, publicConfigIsAbsolutPath_string,
+            false, ""));
+    languages chosen_language =
+        getLanguageChar(configUtils::extractConfig(
+            config_file, publicConfigChosenLang_string,
+            false, ""));
 
     std::string link(argv[1]);
     extractProblemFields(link);
@@ -103,25 +123,34 @@ int main(int argc, char* argv[]) {
 
     fs::path created_file_path;
     std::ofstream code_file = configUtils::createFileAndDir(
-        problem_name, config_file, chosen_language, created_file_path, is_abs_directory);
+        problem_name, config_file, chosen_language,
+        created_file_path, is_abs_directory);
 
-    std::string clean_html_description = apiUtils::cleanHTML(content);
+    std::string clean_html_description =
+        apiUtils::cleanHTML(content);
 
     if (copy_desc)
-        stringUtils::exportProblemHeader(code_file, (int)chosen_language);
+        stringUtils::exportProblemHeader(
+            code_file, (int)chosen_language);
 
     std::string codeToken = "\"langSlug\":";
     codeToken.append("\"");
     codeToken.append(languageTokens[(char)chosen_language]);
     codeToken.append("\"");
 
-    std::string problem_code = stringUtils::extractFromJson(problemDetail_copy, codeToken);
-    stringUtils::exportCodeSnippet(problemDetail_copy, code_file, chosen_language);
+    std::string problem_code = stringUtils::extractFromJson(
+        problemDetail_copy, codeToken);
+    stringUtils::exportCodeSnippet(
+        problemDetail_copy, code_file, chosen_language);
 
     if (copy_desc)
-        stringUtils::exportDescription(clean_html_description, code_file, (int)chosen_language);
+        stringUtils::exportDescription(
+            clean_html_description, code_file,
+            (int)chosen_language);
 
-    stringUtils::outputString("Chosen Language : ", languageTokens[(char)chosen_language]);
+    stringUtils::outputString(
+        "Chosen Language : ",
+        languageTokens[(char)chosen_language]);
 
     code_file.close();
     launchIde(config_file, created_file_path);

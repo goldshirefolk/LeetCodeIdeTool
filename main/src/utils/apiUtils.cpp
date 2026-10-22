@@ -1,21 +1,24 @@
 #include "apiUtils.h"
 
 namespace apiUtils {
-size_t WriteCallback(void* contents, size_t size, size_t nmemb, std::string* response) {
+size_t WriteCallback(void* contents, size_t size, size_t nmemb,
+                     std::string* response) {
     size_t total_size = size * nmemb;
     response->append((char*)contents, total_size);
 
     return total_size;
 }
 
-std::string makeGraphQLRequest(const std::string& query, const std::string& variables = "{}") {
+std::string makeGraphQLRequest(const std::string& query,
+                               const std::string& variables = "{}") {
     CURL* curl = curl_easy_init();
     std::string response;
 
     if (!curl)
         return "";
 
-    std::string post_data = "{\"query\":\"" + query + "\",\"variables\":" + variables + "}";
+    std::string post_data =
+        "{\"query\":\"" + query + "\",\"variables\":" + variables + "}";
 
     std::string escaped_query;
     for (char c : query) {
@@ -27,7 +30,8 @@ std::string makeGraphQLRequest(const std::string& query, const std::string& vari
             escaped_query += c;
     }
 
-    post_data = "{\"query\":\"" + escaped_query + "\",\"variables\":" + variables + "}";
+    post_data =
+        "{\"query\":\"" + escaped_query + "\",\"variables\":" + variables + "}";
 
     struct curl_slist* headers = nullptr;
     headers = curl_slist_append(headers, "Content-Type: application/json");
@@ -53,7 +57,8 @@ std::string cleanHTML(const std::string& html) {
         problem_has_images = true;
     }
 
-    result = std::regex_replace(result, std::regex("<sup>"), " to the power of : ");
+    result =
+        std::regex_replace(result, std::regex("<sup>"), " to the power of : ");
 
     /// Remove HTML tags
     std::regex tagRegex("<[^>]*>");
@@ -82,7 +87,8 @@ std::string getProblemDetail(const std::string& titleSlug) {
 void exportCurrentProblemInfo() {
     problem_id = std::regex_replace(problem_id, std::regex("\""), "");
     problem_title = std::regex_replace(problem_title, std::regex("\""), "");
-    problem_difficulty = std::regex_replace(problem_difficulty, std::regex("\""), "");
+    problem_difficulty =
+        std::regex_replace(problem_difficulty, std::regex("\""), "");
 
     std::string diff_color_wrapper_start = "\033[1;";
     std::string diff_color_wrapper_mid = "m";
@@ -98,8 +104,9 @@ void exportCurrentProblemInfo() {
     }
 
     std::cout << "[" << problem_id << ". " << problem_title << " ("
-              << diff_color_wrapper_start + diff_color_wrapper_mid_add + diff_color_wrapper_mid +
-                     problem_difficulty + diff_color_wrapper_end
+              << diff_color_wrapper_start + diff_color_wrapper_mid_add +
+                     diff_color_wrapper_mid + problem_difficulty +
+                     diff_color_wrapper_end
               << ")]\n\n";
 }
 } // namespace apiUtils

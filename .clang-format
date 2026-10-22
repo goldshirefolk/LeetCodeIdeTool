@@ -1,0 +1,9 @@
+BasedOnStyle: LLVM # starting style: LLVM, Google, Chromium, Mozilla, WebKit, Microsoft, GNU
+IndentWidth: 4 # spaces per indent level
+ColumnLimit: 80 # wrap lines longer than this (0 = never wrap)
+BreakBeforeBraces: Attach # `{` on the same line; use Allman to put it on its own line
+AllowShortFunctionsOnASingleLine: Empty
+AllowShortIfStatementsOnASingleLine: Never
+PointerAlignment: Left # int* p   instead of   int *p
+SortIncludes:
+  Enabled: true

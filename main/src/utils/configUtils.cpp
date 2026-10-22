@@ -18,8 +18,9 @@ void ensureConfigExists(const std::string& path) {
     }
 }
 
-std::string extractConfig(std::ifstream& public_config_file, const std::string configString,
-                          bool mandatory, std::string errorMessage) {
+std::string extractConfig(std::ifstream& public_config_file,
+                          const std::string configString, bool mandatory,
+                          std::string errorMessage) {
     /// Reset file
     public_config_file.clear();
     public_config_file.seekg(0, std::ios::beg);
@@ -59,7 +60,8 @@ std::string extractConfig(std::ifstream& public_config_file, const std::string c
     return buffer;
 }
 
-std::filesystem::path createDir(const std::string& problem_name, const char is_abs_path,
+std::filesystem::path createDir(const std::string& problem_name,
+                                const char is_abs_path,
                                 const std::string& abs_path_name) {
     std::error_code ec;
 
@@ -83,12 +85,14 @@ std::filesystem::path createDir(const std::string& problem_name, const char is_a
     return dir;
 }
 
-std::ofstream createFileAndDir(std::string& problem_name, std::ifstream& config_file,
-                               languages chosen_language, std::filesystem::path& file_path,
+std::ofstream createFileAndDir(std::string& problem_name,
+                               std::ifstream& config_file,
+                               languages chosen_language,
+                               std::filesystem::path& file_path,
                                const char is_abs_path) {
 
-    std::string absolute_directory_path =
-        extractConfig(config_file, publicConfigAbsolutePathDir_string, true, "");
+    std::string absolute_directory_path = extractConfig(
+        config_file, publicConfigAbsolutePathDir_string, true, "");
     if (absolute_directory_path[0] != '/') {
         absolute_directory_path = '/' + absolute_directory_path;
     }
@@ -105,10 +109,12 @@ std::ofstream createFileAndDir(std::string& problem_name, std::ifstream& config_
 
     std::ofstream code_file_path(file_path);
 
-    std::string custom_header_config_tag = chosen_language + "_header";
+    std::string custom_header_config_tag =
+        languageTokens[int(chosen_language)] + "_header";
 
     std::string header;
-    std::string custom_header = extractConfig(config_file, custom_header_config_tag, false, "");
+    std::string custom_header =
+        extractConfig(config_file, custom_header_config_tag, false, "");
 
     if (custom_header != "") {
         header = custom_header;
@@ -124,11 +130,4 @@ std::ofstream createFileAndDir(std::string& problem_name, std::ifstream& config_
     return code_file_path;
 }
 
-inline std::string getConfigPath() {
-    const char* home = std::getenv("HOME");
-    if (home == nullptr) {
-        return configPath;
-    }
-    return std::string(home) + configPath;
-}
 } // namespace configUtils

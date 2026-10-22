@@ -12,7 +12,8 @@ void outputError(const std::string errorString) {
     exit(1);
 }
 
-std::string extractToken(const std::string& string, const std::string& start_token,
+std::string extractToken(const std::string& string,
+                         const std::string& start_token,
                          const std::string& end_token, int* newStartPos) {
     int start = string.find(start_token);
 
@@ -37,7 +38,8 @@ void detokenize(std::string& buffer) {
 
         int token_length = (genericDescTokens[i]).length();
 
-        while ((token_pos_end = buffer.find(genericDescTokens[i], token_pos_start)) !=
+        while ((token_pos_end =
+                    buffer.find(genericDescTokens[i], token_pos_start)) !=
                std::string::npos) {
             buffer.erase(token_pos_end, token_length);
             token_pos_start = token_pos_end - token_length;
@@ -45,13 +47,15 @@ void detokenize(std::string& buffer) {
     }
 }
 
-void processSection(std::string& buffer, int* section, std::ostream& outStream, int lang) {
+void processSection(std::string& buffer, int* section, std::ostream& outStream,
+                    int lang) {
     if (*section <= descSectionMax) {
         std::string token = descSectionTokens[*section];
 
         if (buffer.find(token) != std::string::npos) {
             std::string sectionSymbolBuffer;
-            sectionSymbolBuffer.append(desc_section_symbol_length, descSectionSymbols[2]);
+            sectionSymbolBuffer.append(desc_section_symbol_length,
+                                       descSectionSymbols[2]);
 
             outStream << sectionSymbolBuffer << '\n';
             (*section)++;
@@ -67,8 +71,8 @@ void processSection(std::string& buffer, int* section, std::ostream& outStream, 
     }
 }
 
-void processNewLine(const std::string& description, int* start, int end, std::ostream& outStream,
-                    const int maxNewLines) {
+void processNewLine(const std::string& description, int* start, int end,
+                    std::ostream& outStream, const int maxNewLines) {
     int pos = end;
     int current = 0;
     while (pos < description.length() && description[pos] == newLine_token[0] &&
@@ -108,7 +112,8 @@ void exportProblemHeader(std::ostream& outStream, int lang) {
 
     std::string start_buffer;
 
-    start_buffer += problem_id + ". " + problem_title + " [" + problem_difficulty + "]";
+    start_buffer +=
+        problem_id + ". " + problem_title + " [" + problem_difficulty + "]";
     start_buffer = std::regex_replace(start_buffer, std::regex("\""), "");
 
     outStream << start_buffer << '\n';
@@ -120,7 +125,8 @@ void exportProblemHeader(std::ostream& outStream, int lang) {
     start_buffer += problem_title;
     start_buffer = std::regex_replace(start_buffer, std::regex(" "), "-");
     start_buffer = std::regex_replace(start_buffer, std::regex("\""), "");
-    std::transform(start_buffer.begin(), start_buffer.end(), start_buffer.begin(), ::tolower);
+    std::transform(start_buffer.begin(), start_buffer.end(),
+                   start_buffer.begin(), ::tolower);
     start_buffer += '/';
     outStream << start_buffer << '\n';
 
@@ -131,7 +137,8 @@ void exportProblemHeader(std::ostream& outStream, int lang) {
     outStream << commentDelims[lang][COMMENT_DELIMS_END_INDX] << "\n\n\n";
 }
 
-void exportDescription(std::string& description, std::ostream& outStream, int lang) {
+void exportDescription(std::string& description, std::ostream& outStream,
+                       int lang) {
     int start = 0;
     int end = 0;
 
@@ -141,7 +148,8 @@ void exportDescription(std::string& description, std::ostream& outStream, int la
 
     outStream << commentDelims[lang][COMMENT_DELIMS_START_INDX] << "\n";
 
-    while ((end = description.find(newLine_token, start)) != std::string::npos) {
+    while ((end = description.find(newLine_token, start)) !=
+           std::string::npos) {
         std::string buffer = description.substr(start, end - start);
 
         detokenize(buffer);
@@ -182,7 +190,8 @@ void exportDescription(std::string& description, std::ostream& outStream, int la
 
         outStream << buffer;
 
-        processNewLine(description, &start, end, outStream, maxSectionNewLines[section]);
+        processNewLine(description, &start, end, outStream,
+                       maxSectionNewLines[section]);
 
         buffer.clear();
     }
@@ -193,7 +202,8 @@ void exportDescription(std::string& description, std::ostream& outStream, int la
 void prepareCodeSnippet(std::string& description) {
     int start = description.find("code\":", 0);
     int skipLength = sizeof("codep:");
-    description = description.substr(start + skipLength, description.size() - skipLength);
+    description =
+        description.substr(start + skipLength, description.size() - skipLength);
 
     int code_snippet_end = description.find("\"},{\"lang\"");
     description = description.substr(0, code_snippet_end);
@@ -214,7 +224,8 @@ void exportCodeSnippet(std::string& description, std::ostream& outStream,
                 break;
             }
 
-            if (chosen_language == LANG_PYTHON || chosen_language == LANG_PYTHON3) {
+            if (chosen_language == LANG_PYTHON ||
+                chosen_language == LANG_PYTHON3) {
                 if (description[i] == '\\')
                     i++;
             }
