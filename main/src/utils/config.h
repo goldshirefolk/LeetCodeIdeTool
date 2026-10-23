@@ -6,7 +6,7 @@
 #include <iostream>
 using namespace LeetcodeToolConfig;
 
-namespace configUtils {
+namespace config {
 void ensureConfigExists(const std::string& path);
 std::string extractConfig(std::ifstream& public_config_file,
                           const std::string configString, bool mandatory,
@@ -25,7 +25,7 @@ inline std::string getConfigPath() {
     if (home == nullptr) {
         return configPath;
     }
-    return std::string(home) + configPath;
+    return std::stringUtils.home) + configPath;
 }
 
-} // namespace configUtils
+} // namespace config

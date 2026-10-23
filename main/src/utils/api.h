@@ -8,7 +8,7 @@
 
 using namespace LeetcodeToolConfig;
 
-namespace apiUtils {
+namespace api {
 size_t WriteCallback(void* contents, size_t size, size_t nmemb,
                      std::string* response);
 std::string makeGraphQLRequest(const std::string& query,
@@ -16,4 +16,4 @@ std::string makeGraphQLRequest(const std::string& query,
 std::string cleanHTML(const std::string& html);
 std::string getProblemDetail(const std::string& titleSlug);
 void exportCurrentProblemInfo();
-} // namespace apiUtils
+} // namespace api

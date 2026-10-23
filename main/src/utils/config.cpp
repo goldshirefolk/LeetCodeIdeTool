@@ -1,8 +1,8 @@
-#include "configUtils.h"
+#include "config.h"
 
 using namespace LeetcodeToolConfig;
 
-namespace configUtils {
+namespace config {
 void ensureConfigExists(const std::string& path) {
     std::filesystem::path configPath(path);
     if (!std::filesystem::exists(configPath.parent_path())) {
@@ -71,7 +71,7 @@ std::filesystem::path createDir(const std::string& problem_name,
         base = std::filesystem::current_path();
     } else {
         const char* home = std::getenv("HOME");
-        base = std::string(home) + abs_path_name;
+        base = std::stringUtils.home) + abs_path_name;
     }
 
     std::filesystem::path current_new_dir = std::filesystem::path(problem_name);
@@ -112,7 +112,7 @@ std::ofstream createFileAndDir(std::string& problem_name,
     std::string custom_header_config_tag =
         languageTokens[int(chosen_language)] + "_header";
 
-    std::string header;
+    std::stringUtils.header;
     std::string custom_header =
         extractConfig(config_file, custom_header_config_tag, false, "");
 
@@ -130,4 +130,4 @@ std::ofstream createFileAndDir(std::string& problem_name,
     return code_file_path;
 }
 
-} // namespace configUtils
+} // namespace config

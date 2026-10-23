@@ -1,6 +1,6 @@
-#include "apiUtils.h"
+#include "api.h"
 
-namespace apiUtils {
+namespace api {
 size_t WriteCallback(void* contents, size_t size, size_t nmemb,
                      std::string* response) {
     size_t total_size = size * nmemb;
@@ -109,4 +109,4 @@ void exportCurrentProblemInfo() {
                      diff_color_wrapper_end
               << ")]\n\n";
 }
-} // namespace apiUtils
+} // namespace api
