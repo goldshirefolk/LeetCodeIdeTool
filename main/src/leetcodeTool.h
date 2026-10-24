@@ -6,6 +6,7 @@
 #include "utils/stringUtils.h"
 #include "utils/languages.h"
 #include "utils/general.h"
+#include "utils/commands.h"
 #include <chrono>
 #include <cstdlib>
 #include <filesystem>

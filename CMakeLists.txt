@@ -17,6 +17,7 @@ add_executable(lct
     main/src/utils/stringUtils.cpp
     main/src/utils/languages.cpp
     main/src/utils/general.cpp
+    main/src/utils/commands.cpp
 )
 
 target_include_directories(lct PRIVATE 
