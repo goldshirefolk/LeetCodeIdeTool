@@ -1,48 +1,20 @@
 #include "leetcodeTool.h"
 
-using namespace LeetcodeToolConfig;
 namespace fs = std::filesystem;
-
-void extractProblemFields(std::string& link) {
-    problem_name = stringUtils::nameFromLink(link);
-    problem_detail =
-        apiUtils::getProblemDetail(problem_name);
-    problemDetail_copy = problem_detail;
-    problem_id = stringUtils::extractFromJson(
-        problem_detail, "\"questionId\":");
-    problem_title = stringUtils::extractFromJson(
-        problem_detail, "\"title\":");
-    content = stringUtils::extractFromJson(problem_detail,
-                                           "\"content\":");
-    problem_difficulty = stringUtils::extractFromJson(
-        problem_detail, "\"difficulty\":");
-}
-
-languages getLanguageChar(const std::string& lang) {
-    for (char i = 0; i < LANGUAGE_COUNT; i++) {
-        if (lang == languageTokens[i]) {
-            return (languages)i;
-        }
-    }
-
-    stringUtils::outputError(
-        publicConfigErrorInvalidLanguage);
-    return LANG_INVALID;
-}
 
 void launchIde(std::ifstream& config_file,
                fs::path& file_path) {
     char isActive =
-        (char)std::stoi(configUtils::extractConfig(
+        (char)std::stoi(config::extractConfig(
             config_file, publicConfigActiveIDE_string, true,
             publicConfigErrorNoIsActiveIde));
     if (!isActive)
         return;
 
-    std::string ide_string = configUtils::extractConfig(
+    std::string ide_string = config::extractConfig(
         config_file, publicConfigChosenIDE_string, true,
         publicConfigErrorNoIdeString);
-    stringUtils::outputString("Launch IDE Command : ",
+    outputString("Launch IDE Command : ",
                               ide_string);
 
     std::string command =
@@ -89,45 +61,49 @@ bool processCommands(int argc, char* argv[]) {
     return false;
 }
 
-int main(int argc, char* argv[]) {
+void processArgCount(int argc, char* argv[]) {
     if (argc == 1) {
         std::cout << invalidInputError;
-        return 0;
+        exit(0);
     }
 
     if (processCommands(argc, argv)) {
-        return 0;
+        exit(0);
     }
+}
 
-    configUtils::ensureConfigExists(
-        configUtils::getConfigPath());
-    std::ifstream config_file(configUtils::getConfigPath());
+int main(int argc, char* argv[]) {
+    processArgCount(argc, argv);
+
+    config::ensureConfigExists(
+        config::getConfigPath());
+    std::ifstream config_file(config::getConfigPath());
 
     char copy_desc =
-        (char)std::stoi(configUtils::extractConfig(
+        (char)std::stoi(config::extractConfig(
             config_file, publicConfigCopyDesc_string, false,
             ""));
     char is_abs_directory =
-        (char)std::stoi(configUtils::extractConfig(
+        (char)std::stoi(config::extractConfig(
             config_file, publicConfigIsAbsolutPath_string,
             false, ""));
     languages chosen_language =
-        getLanguageChar(configUtils::extractConfig(
+        getLanguageChar(config::extractConfig(
             config_file, publicConfigChosenLang_string,
             false, ""));
 
     std::string link(argv[1]);
-    extractProblemFields(link);
+    stringUtils::extractProblemFields(link);
 
-    apiUtils::exportCurrentProblemInfo();
+    api::exportCurrentProblemInfo();
 
     fs::path created_file_path;
-    std::ofstream code_file = configUtils::createFileAndDir(
+    std::ofstream code_file = config::createFileAndDir(
         problem_name, config_file, chosen_language,
         created_file_path, is_abs_directory);
 
     std::string clean_html_description =
-        apiUtils::cleanHTML(content);
+        api::cleanHTML(content);
 
     if (copy_desc)
         stringUtils::exportProblemHeader(
@@ -148,7 +124,7 @@ int main(int argc, char* argv[]) {
             clean_html_description, code_file,
             (int)chosen_language);
 
-    stringUtils::outputString(
+    outputString(
         "Chosen Language : ",
         languageTokens[(char)chosen_language]);
 

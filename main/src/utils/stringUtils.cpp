@@ -1,17 +1,6 @@
 #include "stringUtils.h"
 
-// using namespace LeetcodeToolConfig;
-
 namespace stringUtils {
-void outputString(const std::string outputLabel, const std::string output) {
-    std::cout << "\033[1;33m" << outputLabel << "\033[0m" << output << "\n";
-}
-
-void outputError(const std::string errorString) {
-    std::cerr << errorString << "\n";
-    exit(1);
-}
-
 std::string extractToken(const std::string& string,
                          const std::string& start_token,
                          const std::string& end_token, int* newStartPos) {
@@ -246,5 +235,20 @@ void unescapeNewlines(std::string& input) {
         input.replace(p, 2, "\n");
         p++;
     }
+}
+
+void extractProblemFields(std::string& link) {
+    problem_name = stringUtils::nameFromLink(link);
+    problem_detail =
+        api::getProblemDetail(problem_name);
+    problemDetail_copy = problem_detail;
+    problem_id = stringUtils::extractFromJson(
+        problem_detail, "\"questionId\":");
+    problem_title = stringUtils::extractFromJson(
+        problem_detail, "\"title\":");
+    content = stringUtils::extractFromJson(problem_detail,
+                                           "\"content\":");
+    problem_difficulty = stringUtils::extractFromJson(
+        problem_detail, "\"difficulty\":");
 }
 } // namespace stringUtils

@@ -12,9 +12,11 @@ pkg_check_modules(JSONCPP REQUIRED IMPORTED_TARGET jsoncpp)
 
 add_executable(lct 
     main/src/leetcodeTool.cpp
-    main/src/utils/apiUtils.cpp
-    main/src/utils/configUtils.cpp
+    main/src/utils/api.cpp
+    main/src/utils/config.cpp
     main/src/utils/stringUtils.cpp
+    main/src/utils/languages.cpp
+    main/src/utils/general.cpp
 )
 
 target_include_directories(lct PRIVATE 

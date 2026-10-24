@@ -1,12 +1,10 @@
 #pragma once
 
-#include "../../include/config.h"
+#include "../../include/constants.h"
 #include <curl/curl.h>
 #include <iostream>
 #include <json/json.h>
 #include <regex>
-
-using namespace LeetcodeToolConfig;
 
 namespace api {
 size_t WriteCallback(void* contents, size_t size, size_t nmemb,

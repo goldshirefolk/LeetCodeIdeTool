@@ -1,10 +1,11 @@
 #pragma once
 
 #include "stringUtils.h"
+#include "general.h"
+#include "languages.h"
 #include <filesystem>
 #include <fstream>
 #include <iostream>
-using namespace LeetcodeToolConfig;
 
 namespace config {
 void ensureConfigExists(const std::string& path);
@@ -25,7 +26,7 @@ inline std::string getConfigPath() {
     if (home == nullptr) {
         return configPath;
     }
-    return std::stringUtils.home) + configPath;
+    return std::string(home) + configPath;
 }
 
 } // namespace config

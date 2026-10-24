@@ -61,6 +61,6 @@ fi
 
 echo "------------------------------------------------"
 echo "Installation done"
-echo "Binary at /usr/local/bin/lct and config file at ~/.lct/publicConfig.txt" 
+echo "Binary at /usr/local/bin/lct and config file at ~/.lct/publicConfig.txt"
 echo "Run by typing lct"
 echo "------------------------------------------------"
