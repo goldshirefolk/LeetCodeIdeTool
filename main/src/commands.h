@@ -1,9 +1,10 @@
 #pragma once
 
-#include <iostream>
-#include <filesystem>
 #include "include/constants.h"
 #include "config.h"
+
+#include <iostream>
+#include <filesystem>
 
 bool processCommands(int argc, char* argv[]);
 

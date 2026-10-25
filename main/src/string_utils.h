@@ -1,13 +1,13 @@
 #pragma once
 
+#include "include/constants.h"
+#include "languages.h"
+#include "api.h"
+
 #include <iostream>
 #include <regex>
 #include <filesystem>
 #include <fstream>
-
-#include "include/constants.h"
-#include "languages.h"
-#include "api.h"
 
 namespace stringUtils {
 std::string extractToken(const std::string& string,

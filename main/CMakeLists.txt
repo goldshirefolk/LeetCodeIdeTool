@@ -10,7 +10,7 @@ find_package(PkgConfig REQUIRED)
 # This creates a target named PkgConfig::JSONCPP
 pkg_check_modules(JSONCPP REQUIRED IMPORTED_TARGET jsoncpp)
 
-add_executable(lct 
+add_executable(lct
     src/leetcode_tool.cpp
     src/api.cpp
     src/config.cpp
