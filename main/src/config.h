@@ -1,6 +1,6 @@
 #pragma once
 
-#include "stringUtils.h"
+#include "string_utils.h"
 #include "general.h"
 #include "languages.h"
 #include <filesystem>

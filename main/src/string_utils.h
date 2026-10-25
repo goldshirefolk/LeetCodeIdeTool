@@ -5,7 +5,7 @@
 #include <filesystem>
 #include <fstream>
 
-#include "../../include/constants.h"
+#include "include/constants.h"
 #include "languages.h"
 #include "api.h"
 

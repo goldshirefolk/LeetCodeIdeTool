@@ -11,17 +11,17 @@ find_package(PkgConfig REQUIRED)
 pkg_check_modules(JSONCPP REQUIRED IMPORTED_TARGET jsoncpp)
 
 add_executable(lct 
-    main/src/leetcodeTool.cpp
-    main/src/utils/api.cpp
-    main/src/utils/config.cpp
-    main/src/utils/stringUtils.cpp
-    main/src/utils/languages.cpp
-    main/src/utils/general.cpp
-    main/src/utils/commands.cpp
+    src/leetcode_tool.cpp
+    src/api.cpp
+    src/config.cpp
+    src/string_utils.cpp
+    src/languages.cpp
+    src/general.cpp
+    src/commands.cpp
 )
 
-target_include_directories(lct PRIVATE 
-    ${CMAKE_CURRENT_SOURCE_DIR}/include
+target_include_directories(lct PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/include
 )
 
 target_link_libraries(lct PRIVATE

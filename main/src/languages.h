@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../../include/constants.h"
+#include "include/constants.h"
 #include "general.h"
 #include <vector>
 #include <string>
@@ -29,8 +29,6 @@ typedef enum {
     LANG_RUST,
     LANG_INVALID
 } languages;
-
-languages getLanguageChar(const std::string& lang);
 
 inline const std::vector<std::string> codeFileSufixes = {
     ".cpp",   ".c",   ".cs",   ".java",  ".py", ".py",  ".js",  ".ts", ".go", ".kt",
@@ -114,3 +112,5 @@ inline const std::vector<std::string> languageTokens = {
     "rust",       //  rust
     "\n\nINVALID!!\n\n",
 };
+
+languages getLanguageChar(const std::string& lang);
